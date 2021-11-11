@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/goinggo/mapstructure"
+	"log"
 	"reflect"
 )
 
@@ -93,11 +94,11 @@ func GetSingleResponse(jsonData map[string]interface{}, result interface{}) erro
 	if ok {
 		resErr := new(Error)
 		err = GetStruct(emData, resErr)
-		Debug(resErr.Message)
+		log.Println(resErr.Message)
 		return errors.New(resErr.Message)
 	}
 	if err = mapstructure.Decode(jsonData["result"], result); err != nil {
-		Debug(err)
+		log.Println(err)
 		return err
 	}
 	return err
@@ -110,7 +111,7 @@ func GetResult(b []byte, result interface{}) error {
 	)
 	err = json.Unmarshal(b, &jsonData)
 	if err != nil {
-		Debug(err)
+		log.Println(err)
 	}
 	if reflect.ValueOf(jsonData).Kind() == reflect.Map {
 		err = GetSingleResponse(jsonData.(map[string]interface{}), result)
@@ -133,7 +134,7 @@ func ParseResponseBody(b []byte) (interface{}, error) {
 	var jsonData interface{}
 	err = json.Unmarshal(b, &jsonData)
 	if err != nil {
-		Debug(err)
+		log.Println(err)
 	}
 	return jsonData, err
 }
