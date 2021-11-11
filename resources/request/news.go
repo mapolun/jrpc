@@ -6,6 +6,7 @@ type Host struct {
 }
 
 type ParamsDingDing struct {
-	Host Host   `json:"host"`
-	Msg  string `json:"msg"`
+	Host      Host   `json:"host"`
+	Msg       string `json:"msg"`
+	AtMobiles []interface{}
 }

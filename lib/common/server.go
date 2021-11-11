@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/time/rate"
+	"log"
 	"reflect"
 	"strings"
 	"sync"
@@ -67,31 +68,31 @@ func RegisterMethod(rm reflect.Method) *Method {
 	rmn := rm.Name
 	if rm.Type.NumIn() != 3 {
 		msg = fmt.Sprintf("RegisterMethod: method %q has %d input parameters; needs exactly three", rmn, rmt.NumIn())
-		Debug(msg)
+		log.Println(msg)
 		return nil
 	}
 	p := rmt.In(1)
 	if p.Kind() != reflect.Ptr {
 		msg = fmt.Sprintf("RegisterMethod: Params type of method %q is not a reflect.Ptr:%q", rmn, p)
-		Debug(msg)
+		log.Println(msg)
 		return nil
 	}
 	r := rmt.In(2)
 	if r.Kind() != reflect.Ptr {
 		msg = fmt.Sprintf("RegisterMethod: Result type of method %q is not a reflect.Ptr:%q", rmn, r)
-		Debug(msg)
+		log.Println(msg)
 		return nil
 	}
 
 	if rm.Type.NumOut() != 1 {
 		msg = fmt.Sprintf("RegisterMethod: Method %q has %d output parameters; needs exactly one", rmn, rmt.NumOut())
-		Debug(msg)
+		log.Println(msg)
 		return nil
 	}
 	ret := rmt.Out(0)
 	if ret != reflect.TypeOf((*error)(nil)).Elem() {
 		msg = fmt.Sprintf("RegisterMethod: Return type of method %q is not a must be error:%q", rmn, ret)
-		Debug(msg)
+		log.Println(msg)
 		return nil
 	}
 	m := &Method{rmn, p, r, rm}
@@ -170,7 +171,7 @@ func (svr *Server) SingleHandler(jsonMap map[string]interface{}) interface{} {
 	r := m.Method.Func.Call([]reflect.Value{s.(*Service).V, params, result})
 
 	if i := r[0].Interface(); i != nil {
-		Debug(i.(error))
+		log.Println(i.(error))
 		return E(id, jsonRpc, InternalError)
 	}
 	// after

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/goinggo/mapstructure"
+	"log"
 	"reflect"
 	"strings"
 )
@@ -51,7 +52,7 @@ func GetRequestBody(b []byte) interface{} {
 }
 
 func GetRequestParams(b []byte, params interface{}) error {
-	Debug(reflect.TypeOf(params))
+	log.Println(reflect.TypeOf(params))
 	err := GetStructFromJson(b, params)
 	if err != nil {
 		return err
@@ -70,7 +71,7 @@ func ParseRequestMethod(method string) (sName string, mName string, err error) {
 	}
 	if strings.Count(method, ".") != 1 && strings.Count(method, "/") != 1 {
 		m = fmt.Sprintf("rpc: method request ill-formed: %s; need x.y or x/y", method)
-		Debug(m)
+		log.Println(m)
 		return sName, mName, errors.New(m)
 	}
 	if strings.Count(method, ".") == 1 {
@@ -128,7 +129,7 @@ func ParseRequestBody(b []byte) (interface{}, error) {
 	var jsonData interface{}
 	err = json.Unmarshal(b, &jsonData)
 	if err != nil {
-		Debug(err)
+		log.Println(err)
 	}
 	return jsonData, err
 }
@@ -148,14 +149,14 @@ func GetStructFromJson(d []byte, s interface{}) error {
 	)
 	if reflect.TypeOf(s).Kind() != reflect.Ptr {
 		m = fmt.Sprintf("reflect: Elem of invalid type %s, need reflect.Ptr", reflect.TypeOf(s))
-		Debug(m)
+		log.Println(m)
 		return errors.New(m)
 	}
 
 	var jsonData interface{}
 	err = json.Unmarshal(d, &jsonData)
 	if err != nil {
-		Debug(err)
+		log.Println(err)
 		return err
 	}
 	_ = GetStruct(jsonData, s)
@@ -169,7 +170,7 @@ func GetStruct(d interface{}, s interface{}) error {
 	)
 	if reflect.TypeOf(s).Kind() != reflect.Ptr {
 		m = fmt.Sprintf("reflect: Elem of invalid type %s, need reflect.Ptr", reflect.TypeOf(s))
-		Debug(m)
+		log.Println(m)
 		return errors.New(m)
 	}
 	t = reflect.TypeOf(s).Elem()
@@ -178,14 +179,14 @@ func GetStruct(d interface{}, s interface{}) error {
 	case reflect.Map:
 		if t.NumField() != len(d.(map[string]interface{})) {
 			m = fmt.Sprintf("json: The number of parameters does not match")
-			Debug(m)
+			log.Println(m)
 			return errors.New(m)
 		}
 		for k := 0; k < t.NumField(); k++ {
 			lk := strings.ToLower(t.Field(k).Name)
 			if _, ok := d.(map[string]interface{})[lk]; ok != true {
 				m = fmt.Sprintf("json: can not find field \"%s\"", lk)
-				Debug(m)
+				log.Println(m)
 				return errors.New(m)
 			}
 		}
@@ -194,7 +195,7 @@ func GetStruct(d interface{}, s interface{}) error {
 	case reflect.Slice:
 		if t.NumField() != reflect.ValueOf(d).Len() {
 			m = fmt.Sprintf("json: The number of parameters does not match")
-			Debug(m)
+			log.Println(m)
 			return errors.New(m)
 		}
 		for k := 0; k < t.NumField(); k++ {
@@ -205,7 +206,7 @@ func GetStruct(d interface{}, s interface{}) error {
 		break
 	}
 	if err := mapstructure.Decode(jsonMap, s); err != nil {
-		Debug(err)
+		log.Println(err)
 		return err
 	}
 	return nil
