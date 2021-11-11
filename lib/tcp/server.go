@@ -14,7 +14,7 @@ type moduleServer struct {
 }
 
 // NewServer 监听
-func NewServer(port string) *moduleServer {
+func NewServer(ip string, port string) *moduleServer {
 	//开始监听
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	log.Println(fmt.Sprintf("listen at :%v", port))

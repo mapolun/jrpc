@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/wonderivan/logger"
 	"io/ioutil"
 	"jrpc/lib/common"
 	"log"
@@ -12,10 +13,11 @@ import (
 type moduleServer struct {
 	Server common.Server
 	Port   string
+	Ip     string
 }
 
 // NewServer 监听
-func NewServer(port string) *moduleServer {
+func NewServer(ip string, port string) *moduleServer {
 	//开始监听
 	return &moduleServer{
 		common.Server{
@@ -24,6 +26,7 @@ func NewServer(port string) *moduleServer {
 			nil,
 		},
 		port,
+		ip,
 	}
 }
 
@@ -39,8 +42,8 @@ func (m *moduleServer) Register(i interface{}) {
 func (m *moduleServer) Start() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", m.handleFunc)
-	var url = fmt.Sprintf("%v:%v", "127.0.0.1", m.Port)
-	log.Printf("Listening http://%v:%v", "127.0.0.1", m.Port)
+	var url = fmt.Sprintf("%v:%v", m.Ip, m.Port)
+	log.Printf("Listening http://%v:%v", m.Ip, m.Port)
 	err := http.ListenAndServe(url, mux)
 	if err != nil {
 		log.Println("server \t 监听错误")
@@ -63,9 +66,10 @@ func (m *moduleServer) handleFunc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("请求时间：" + common.FnGetDate())
-	fmt.Println("来源IP：" + common.FnGetClientIp(r))
-	fmt.Println(string(data))
+	logger.Info("来源IP", common.FnGetClientIp(r))
+	logger.Info("请求头部", r.Header)
+	logger.Info("请求参数", string(data))
 	res := m.Server.Handler(data)
+	logger.Info("响应参数", string(res))
 	w.Write(res)
 }
